@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BehavXR'26: 1st International Workshop on XR for Behavioral Health at ISMAR 2026, Bari, Italy, October 6, 2026.">
+<title>BehavXR'26 — XR for Behavioral Health @ ISMAR 2026</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">BehavXR'26</span>
+  <div class="nav-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="cfp.html">Call for Papers</a>
+    <a href="organizers.html">Organizers</a>
+  </div>
+</nav>
+
+<div class="hero" style="position:relative; overflow:hidden;">
+  <canvas id="sigCanvas" aria-hidden="true" style="
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; opacity:0.18;
+  "></canvas>
+
+  <div style="position:relative; z-index:1;">
+    <div class="tag">ISMAR 2026 Workshop</div>
+    <h1>XR for Behavioral Health: Body Signals, Behavior Change, and Responsible Design</h1>
+    <p class="acronym">BehavXR'26</p>
+    <div class="meta">
+      <span>Bari, Italy</span>
+      <span>October 6, 2026</span>
+      <span>Half-day · Hybrid</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('sigCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const channels = [
+    { y: 0.22, amp: 26, freq: 0.012, speed: 0.18, color: '#2aafb0', type: 'sine'  },
+    { y: 0.50, amp: 22, freq: 0.008, speed: 0.11, color: '#7de0e1', type: 'pulse' },
+    { y: 0.78, amp: 14, freq: 0.030, speed: 0.30, color: '#2aafb0', type: 'eeg'   },
+  ];
+
+  let t = 0, W, H, raf;
+
+  function resize() {
+    W = canvas.offsetWidth; H = canvas.offsetHeight;
+    canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+  }
+
+  function eegNoise(x, t) {
+    return Math.sin(x * 0.03 + t) * 0.5
+         + Math.sin(x * 0.07 - t * 1.3) * 0.3
+         + Math.sin(x * 0.15 + t * 0.9) * 0.2;
+  }
+
+  function pulseShape(phase) {
+    const p = ((phase % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const norm = p / (Math.PI * 2);
+    if (norm < 0.05) return norm / 0.05;
+    if (norm < 0.10) return 1 - (norm - 0.05) / 0.05 * 2;
+    if (norm < 0.15) return -1 + (norm - 0.10) / 0.05;
+    return Math.sin(norm * Math.PI * 2) * 0.08;
+  }
+
+  function drawChannel(ch) {
+    ctx.beginPath();
+    ctx.strokeStyle = ch.color;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = ch.color;
+    ctx.shadowBlur = 8;
+    const cy = H * ch.y;
+    for (let x = 0; x <= W; x += 2) {
+      const phase = x * ch.freq + t * ch.speed;
+      let y;
+      if (ch.type === 'sine')  y = cy - Math.sin(phase) * ch.amp;
+      if (ch.type === 'pulse') y = cy - pulseShape(phase) * ch.amp * 2.2;
+      if (ch.type === 'eeg')   y = cy - eegNoise(x, t * ch.speed) * ch.amp;
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    channels.forEach(drawChannel);
+    t += 0.22;
+    raf = requestAnimationFrame(loop);
+  }
+
+  resize();
+  window.addEventListener('resize', () => { cancelAnimationFrame(raf); resize(); loop(); });
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    channels.forEach(drawChannel);
+  } else {
+    loop();
+  }
+})();
+</script>
+
+<div class="dates-banner">
+  <div class="date-item">
+    <div class="date-label">Submission Deadline</div>
+    <div class="date-val">5 July 2026</div>
+  </div>
+  <div class="date-item">
+    <div class="date-label">Notification</div>
+    <div class="date-val">17 July 2026</div>
+  </div>
+  <div class="date-item">
+    <div class="date-label">Camera-Ready</div>
+    <div class="date-val">31 July 2026</div>
+  </div>
+  <div class="date-item">
+    <div class="date-label">Workshop</div>
+    <div class="date-val">October 6, 2026</div>
+  </div>
+</div>
+
+<div style="background:#fff;">
+<div class="container">
+<section>
+  <h2>About</h2>
+  <p>
+    Extended reality (XR) is increasingly used in behavioral health for assessment, intervention,
+    behavior change, and skill development. Three research communities are advancing this work in
+    parallel: clinical and behavioral scientists using XR cue reactivity paradigms to measure
+    psychophysiological responses; XR and HCI researchers designing embodied systems to support
+    health behavior change; and participatory designers co-creating XR tools with clinical and youth
+    populations.
+  </p>
+  <p>
+    These communities rarely share a venue. BehavXR'26 brings them together for the first time at
+    ISMAR, with a methodology-forward agenda to develop shared standards, language, and design
+    frameworks for XR behavioral health research. The workshop is structured around three pillars:
+  </p>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="p-num">Pillar 1</div>
+      <h3>Physiological Sensing for Behavioral Health</h3>
+      <p>Signal integration, synchronization, and reporting standards for cue reactivity and psychophysiological assessment in XR.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">Pillar 2</div>
+      <h3>Health Behavior Change through Game Technology</h3>
+      <p>Avatar-based interventions, future-self continuity, and game-driven XR experiences that support measurable behavior change.</p>
+    </div>
+    <div class="pillar">
+      <div class="p-num">Pillar 3</div>
+      <h3>Responsible Co-Design with Vulnerable Populations</h3>
+      <p>Participatory design methods, ethical frameworks, and ecological validity for XR tools developed with clinical and youth populations.</p>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+
+<div style="background:#f7f9fc;">
+<div class="container">
+<section>
+  <h2>Workshop Format</h2>
+  <p>BehavXR'26 is a half-day hybrid workshop (approximately 3.5 hours) conducted primarily in person in Bari, Italy, with remote participation supported. The format goes beyond a mini-conference: curated paper sessions are combined with a cross-pillar discussion panel and a structured community output activity.</p>
+  <p style="font-size:.85rem; color:#6b7280; font-style:italic; margin-bottom:1rem;">&#9432; The agenda below is tentative and subject to change.</p>
+
+  <table class="agenda">
+    <thead>
+      <tr><th>Time</th><th>Session</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1:00–1:20</td>
+        <td><strong>Opening &amp; Keynote</strong></td>
+      </tr>
+      <tr>
+        <td>1:20–2:00</td>
+        <td>
+          <strong>Session 1: Sensing the Body</strong>
+          <div class="session-detail">Papers on behavioral health sensing. 5–8 min presentation + 2 min Q&amp;A each.</div>
+        </td>
+      </tr>
+      <tr>
+        <td>2:00–2:40</td>
+        <td>
+          <strong>Session 2: Changing Behavior</strong>
+          <div class="session-detail">Papers on health behavior change interventions and game technology. 5–8 min + 2 min Q&amp;A each.</div>
+        </td>
+      </tr>
+      <tr>
+        <td>2:40–2:55</td>
+        <td><strong>Break</strong></td>
+      </tr>
+      <tr>
+        <td>2:55–3:35</td>
+        <td>
+          <strong>Session 3: Designing Responsibly</strong>
+          <div class="session-detail">Papers on co-design methodology, ethics, and clinical translation. 5–8 min + 2 min Q&amp;A each.</div>
+        </td>
+      </tr>
+      <tr>
+        <td>3:35–4:10</td>
+        <td><strong>Cross-Pillar Discussion Panel</strong></td>
+      </tr>
+      <tr>
+        <td>4:10–4:30</td>
+        <td>
+          <strong>Community Output Session</strong>
+          <div class="session-detail">Facilitated breakout producing a draft BehavXR Minimum Reporting Checklist — a shared standard for behavioral health XR research, to be circulated post-workshop for community refinement and publication.</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+</div>
+</div>
+
+<div style="background:#fff;">
+<div class="container">
+<section>
+  <h2>Accepted Papers will be published in</h2>
+  <p>ISMAR 2026 Adjunct Proceedings via <strong>IEEE Xplore</strong>.</p>
+  <p style="margin-top:1.25rem;">
+    <a href="cfp.html" style="
+      display:inline-block; background:#1c3f6e; color:#fff;
+      padding:.65rem 1.5rem; border-radius:4px; font-weight:600; font-size:.9rem;
+    ">View Call for Papers &rarr;</a>
+  </p>
+</section>
+</div>
+</div>
+
+<footer>
+  BehavXR'26 &mdash; 1st International Workshop on XR for Behavioral Health @ ISMAR 2026, Bari, Italy &nbsp;|&nbsp;
+  Contact: <a href="mailto:s.wei@yale.edu">s.wei@yale.edu</a>
+</footer>
+
+</body>
+</html>
